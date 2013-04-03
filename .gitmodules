@@ -1,0 +1,3 @@
+[submodule "github-fork-ribbon-css"]
+	path = github-fork-ribbon-css
+	url = git://github.com/simonwhitaker/github-fork-ribbon-css.git
