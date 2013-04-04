@@ -82,6 +82,11 @@
     text-align: center;
     line-height: 2em;
 }
+#extra-controls {
+    position: absolute;
+    left: 40px;
+    top: 480px;
+}
 #solve {
     width: 180px;
     height: 40px;
@@ -90,8 +95,8 @@
 }
 #status {
     position: absolute;
-    top: 480px;
-    left: 60px;
+    top: 520px;
+    left: 100px;
 }
 #solutions {
     position: absolute;
@@ -114,6 +119,35 @@
     border: 2px solid black;
     width: 10px;
     height: 10px;
+}
+#import-popup {
+    position: absolute;
+    border: 3px solid black;
+    background: #eee;
+    padding: 20px;
+    width: 400px;
+    height: 220px;
+    left: 440px;
+    top: 190px;
+}
+#import-legend {
+    line-height: 1.6em;
+}
+#import-textarea {
+    position: absolute;
+    left: 125px;
+    top: 20px;
+    font-size: 28px;
+    font-family: Consolas, monospace;
+    letter-spacing: 28px;
+}
+#import-control {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+}
+#import-import {
+    font-weight: bold;
 }
 </style>
 <link rel="stylesheet" href="github-fork-ribbon-css/gh-fork-ribbon.css"/>
@@ -227,7 +261,10 @@
         <label for="allow-8">Allow 8-direction movement</label><br />
     <label for="max-length">Max path length</label>
         <input id="max-length" value="16" size="3"/><br />
-    <input type="button" value="Solve" id="solve"/><br />
+    <input type="button" value="Solve" id="solve"/>
+</div>
+
+<div id="extra-controls">
     <input type="button" value="Drop matches" id="drop"/>
     &bull;
     <select id="randomization-type">
@@ -240,6 +277,8 @@
     <input type="button" value="Randomize" id="randomize"/>
     &bull;
     <input type="button" value="Clear" id="clear"/>
+    &bull;
+    <input type="button" value="Import" id="import"/>
 </div>
 
 <div id="solutions">
@@ -247,6 +286,24 @@
 </div>
 
 <div id="hand">
+</div>
+
+<div id="import-popup">
+    <div id="import-legend">
+        <span class="e0"></span> = 0 / r<br />
+        <span class="e1"></span> = 1 / b<br />
+        <span class="e2"></span> = 2 / g<br />
+        <span class="e3"></span> = 3 / y<br />
+        <span class="e4"></span> = 4 / p<br />
+        <span class="e5"></span> = 5 / h<br />
+        <span class="e6"></span> = 6 / j<br />
+        <span class="eX"></span> = . / x<br />
+    </div>
+    <textarea id="import-textarea" cols="6" rows="5"></textarea>
+    <div id="import-control">
+        <input type="button" value="Cancel" id="import-cancel"/>
+        <input type="button" value="Import" id="import-import"/>
+    </div>
 </div>
 
 <div class="github-fork-ribbon-wrapper left-bottom">
@@ -765,6 +822,7 @@ $(document).ready(function() {
     });
 
     $('#hand').hide();
+    $('#import-popup').hide();
 
     $('#profile-selector').change(function() {
         var values = this.value.split(/,/);
@@ -831,6 +889,39 @@ $(document).ready(function() {
         var board = in_place_evaluate_solution(solution, get_weights());
         show_board(board);
         clear_canvas();
+    });
+
+    $('#import').click(function() {
+        var board = get_board();
+        var content = board.map(function(row) { return row.join(''); }).join('\n').replace(/X/g, '.');
+        $('#import-textarea').val(content);
+        $('#import-popup').show();
+    });
+
+    $('#import-cancel').click(function() {
+        $('#import-popup').hide();
+    });
+
+    $('#import-import').click(function() {
+        var board_raw = $('#import-textarea').val();
+        var board_joined = board_raw
+                .replace(/r/gi, '0')
+                .replace(/b/gi, '1')
+                .replace(/g/gi, '2')
+                .replace(/y/gi, '3')
+                .replace(/p/gi, '4')
+                .replace(/h/gi, '5')
+                .replace(/j/gi, '6')
+                .replace(/\s/g, '')
+                .replace(/[^0-6]/g, 'X');
+        if (board_joined.length != ROWS * COLS) {
+            alert('Wrong number of orbs!');
+            return;
+        }
+        var board = board_joined.match(/.{6}/g).map(function(s) { return s.split(''); });
+        show_board(board);
+        clear_canvas();
+        $('#import-popup').hide();
     });
 });
 
